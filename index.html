@@ -1,0 +1,103 @@
+
+<h1>Gracias por tu visita</h1>
+<!-- <ul id="counter"></ul> -->
+ <small id="lastvisit"></small>
+
+<script type="module" >
+    import CanvasConfetti from 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/+esm';
+    CanvasConfetti()
+
+    // const fetching = async (uri, method = 'GET', params = null) => {
+    //     let request = new Request(uri, {
+    //         method,
+    //         body: params ? JSON.stringify(params) : null,
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //     });
+    //     if(method === 'GET') {
+    //         request = new Request(uri);
+    //     }
+    //     const res = await fetch(request);
+    //     // const res = await fetch(`https://geolocation.microlink.io/`);
+    //     const resJson = await res.json();
+    //     return resJson;
+    // }
+
+    // fetching(`https://geolocation.microlink.io/`)
+    // .then(response => {
+    //     const {
+    //         ip,
+    //         city: {
+    //             name: city,
+    //         },
+    //         country: {
+    //             name: country,
+    //             flag,
+    //         }
+    //     } = response;
+
+    //     fetching(`/visit`, 'POST', { city, country, flag })
+    //     .then(result=> {
+    //         console.warn( result );
+    //     })
+    //     .catch(error => {
+    //         console.log(error);
+    //     })
+    // })
+    // .catch(error => {
+    //     console.log(error);
+    // })
+
+    const res = await fetch(`https://geolocation.microlink.io/`);
+    const resJson = await res.json();
+    const {
+        ip,
+        city: {
+            name: city,
+        },
+        country: {
+            name: country,
+            flag,
+        }
+    } = resJson;
+
+    let request = new Request('/visit', {
+            method: 'POST',
+            body: JSON.stringify({city, country, flag}),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    await fetch(request);
+
+
+    // const counter = document.getElementById('counter');
+    const small = document.querySelector('#lastvisit');
+    const source = new EventSource('/visit');
+    source.addEventListener('lastvisit', (event) => {
+        // const li = document.createElement('li');
+        // li.innerText = event.data;
+        // counter.appendChild(li);
+        const { city, country, flag } = JSON.parse(event.data);
+        small.innerText = `Ultima visita desde: ${city}, ${country}, ${flag}`;
+    });
+</script>
+
+<style>
+    :root {
+        color-scheme: light dark;
+    }
+    body {
+        display: grid;
+        place-content: center;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+    small {
+        font-size: 12px;
+        color: #f6f6f6;
+        text-align: center;
+        font-family: Menlo, monospace;
+    }
+</style>
